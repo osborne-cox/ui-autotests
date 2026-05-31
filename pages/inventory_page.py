@@ -14,24 +14,15 @@ class InventoryPage:
         self.menu_button = page.locator('#react-burger-menu-btn')
         self.logout_link = page.locator('#logout_sidebar_link')
 
-    def is_loaded(self) -> bool:
-        return self.page.url == self.URL
-
     def add_backpack_to_cart(self):
         self.add_backpack_btn.click()
 
     def add_bike_light_to_cart(self):
         self.add_bike_light_btn.click()
 
-    def get_cart_count(self) -> int:
-        # Бейджа нет, когда корзина пуста.
-        if not self.cart_badge.is_visible():
-            return 0
-        return int(self.cart_badge.text_content())
-
     def logout(self):
         self.menu_button.click()
-        # FIXME: хардкод-пауза на анимацию меню. Заменить на ожидание видимости
-        # logout_link (expect / wait_for), иначе тест флакает на медленной машине.
-        self.page.wait_for_timeout(500)
+        # Бургер-меню выезжает с анимацией. click() сам дожидается, пока ссылка
+        # станет видимой и кликабельной (авто-ожидание Playwright), поэтому
+        # хардкод-паузы здесь не нужны.
         self.logout_link.click()
