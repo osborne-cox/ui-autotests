@@ -1,3 +1,4 @@
+from playwright.sync_api import Page, expect
 from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
 
@@ -10,39 +11,34 @@ WRONG_PASSWORD = "wrong123"
 
 class TestLogin:
 
-    def test_successful_login(self, page):
+    def test_successful_login(self, page: Page):
         """Позитивный: корректные данные → попадаем на страницу товаров."""
         login_page = LoginPage(page)
         login_page.open()
 
         login_page.login(VALID_USER, VALID_PASSWORD)
 
-        inventory = InventoryPage(page)
-        assert inventory.is_loaded(), (
-            f"После логина ожидали {InventoryPage.URL}, получили {page.url}"
-        )
+        # Веб-first ожидание: ждём нужный URL, а не читаем page.url сразу
+        # после клика (иначе ловим состояние до завершения навигации).
+        expect(page).to_have_url(InventoryPage.URL)
 
-    def test_login_wrong_password(self, page):
-        """Негативный: неверный пароль → отображается ошибка с нужным текстом."""
+    def test_login_wrong_password(self, page: Page):
+        """Негативный: неверный пароль → ошибка с нужным текстом."""
         login_page = LoginPage(page)
         login_page.open()
 
         login_page.login(VALID_USER, WRONG_PASSWORD)
 
-        assert login_page.is_error_visible(), \
-            "Ошибка не появилась после неверного пароля"
+        expect(login_page.error_message).to_be_visible()
+        expect(login_page.error_message).to_contain_text(
+            "Username and password do not match"
+        )
 
-        error_text = login_page.get_error_text()
-        assert "Username and password do not match" in error_text, \
-            f"Неожиданный текст ошибки: '{error_text}'"
-
-    def test_login_locked_user(self, page):
+    def test_login_locked_user(self, page: Page):
         """Негативный: заблокированный аккаунт → ошибка о блокировке."""
         login_page = LoginPage(page)
         login_page.open()
 
         login_page.login(LOCKED_USER, VALID_PASSWORD)
 
-        error_text = login_page.get_error_text()
-        assert "locked out" in error_text.lower(), \
-            f"Ожидали сообщение о блокировке, получили: '{error_text}'"
+        expect(login_page.error_message).to_contain_text("locked out")
