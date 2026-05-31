@@ -1,6 +1,6 @@
 # UI Autotests — saucedemo.com
 
-![UI Tests](https://github.com/osborne-cox/ui-autotests/actions/workflows/tests.yml/badge.svg)
+[![UI Tests](https://github.com/osborne-cox/ui-autotests/actions/workflows/tests.yml/badge.svg)](https://github.com/osborne-cox/ui-autotests/actions)
 
 Автоматизированные UI-тесты на Python + Playwright по архитектуре **Page Object Model**.
 
